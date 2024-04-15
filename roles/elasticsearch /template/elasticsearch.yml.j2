@@ -1,0 +1,48 @@
+#jinja2:lstrip_blocks: True
+{{ ansible_managed | comment }}
+
+# ---------------------------------- Cluster -----------------------------------
+cluster.name: {{ elasticsearch_cluster_name }}
+
+# ------------------------------------ Node ------------------------------------
+node.name: {{ ansible_hostname }}
+node.attr.rack: r1
+
+# ----------------------------------- Paths ------------------------------------
+path.data: {{ elasticsearch_data_directory }}
+path.logs: {{ elasticsearch_log_directory }}
+
+# ----------------------------------- Memory -----------------------------------
+#bootstrap.memory_lock: true
+
+# ---------------------------------- Network -----------------------------------
+network.host: {{ ansible_facts.default_ipv4.address }}
+http.port: 9200
+
+# --------------------------------- Discovery ----------------------------------
+{% for node in groups['elasticsearch'] %}
+  discovery.seed_hosts: "{{ node.split('.')[0] }}"
+  cluster.initial_master_nodes: "{{ hostvars[node]['ansible_default_ipv4']['address'] }}"
+{% endfor %}
+
+#action.destructive_requires_name: false
+
+#----------------------- BEGIN SECURITY AUTO CONFIGURATION -----------------------
+xpack.security.enabled: false
+xpack.security.enrollment.enabled: true
+
+# Enable encryption for HTTP API client connections, such as Kibana, Logstash, and Agents
+xpack.security.http.ssl:
+  enabled: true
+  keystore.path: certs/http.p12
+
+# Enable encryption and mutual authentication between cluster nodes
+xpack.security.transport.ssl:
+  enabled: true 
+  verification_mode: certificate
+  keystore.path: certs/transport.p12
+  truststore.path: certs/transport.p12
+
+#cluster.initial_master_nodes: ["elastic1"]
+http.host: 0.0.0.0
+transport.host: 0.0.0.0

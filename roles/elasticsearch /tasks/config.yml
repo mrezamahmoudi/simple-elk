@@ -1,0 +1,70 @@
+- name: Creates directory
+  file:
+    path: '{{ item }}'
+    owner: elasticsearch
+    group: elasticsearch
+    mode: '0755'
+    state: directory
+  with_items:
+    - '{{ elasticsearch_data_directory }}'
+    - '{{ elasticsearch_log_directory }}'
+
+- name: Generate elasticsearch config file
+  ansible.builtin.template:
+    src: elasticsearch.yml.j2
+    dest: /etc/elasticsearch/elasticsearch.yml
+    owner: elasticsearch
+    group: elasticsearch
+    mode: '0644'
+  notify: restart elasticsearch
+  tags:
+    - update_elasticsearch_conf
+
+# - name: Generate elasticsearch jvm file
+#   ansible.builtin.template:
+#     src: jvm.options.j2
+#     dest: /etc/elasticsearch/jvm.options
+#     owner: root
+#     group: elasticsearch
+#     mode: '0660'
+#   notify: restart elasticsearch
+#   tags:
+#     - update_elasticsearch_jvm
+
+# - name: Copy elastic certificate file
+#   copy:
+#     src: elastic-certificates.p12
+#     dest: '{{ elasticsearch_certificate_location }}'
+#     owner: elasticsearch
+#     group: elasticsearch
+#     mode: '0644'
+#   notify: restart elasticsearch
+#   tags:
+#     - update_elasticsearch_cert
+
+# - name: Copy elastic CA file
+#   copy:
+#     src: elastic-old-ca.pem
+#     dest: '{{ elasticsearch_ca_location }}'
+#     owner: root
+#     group: elasticsearch
+#     mode: '0644'
+#   notify: restart elasticsearch
+#   tags:
+#     - update_elasticsearch_cert
+
+# - name: Set xpack.security.transport.ssl.truststore.secure_password
+#   ansible.builtin.shell:
+#     cmd: echo '{{ elasticsearch_pkcs12_password }}' | /usr/share/elasticsearch/bin/elasticsearch-keystore add -xf xpack.security.transport.ssl.truststore.secure_password
+#   notify: restart elasticsearch
+#   no_log: true
+#   tags:
+#     - update_elasticsearch_cert
+
+# - name: Set xpack.security.transport.ssl.keystore.secure_password
+#   ansible.builtin.shell:
+#     cmd: echo '{{ elasticsearch_pkcs12_password }}' | /usr/share/elasticsearch/bin/elasticsearch-keystore add -xf xpack.security.transport.ssl.keystore.secure_password
+#   notify: restart elasticsearch
+#   no_log: true
+#   tags:
+#     - update_elasticsearch_cert

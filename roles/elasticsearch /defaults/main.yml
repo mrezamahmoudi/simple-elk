@@ -1,0 +1,6 @@
+elasticsearch_version: 8.13.1
+registry_url: https://artifacts.elastic.co
+elasticsearch_cluster_name: test
+elasticsearch_data_directory: /opt/elasticsearch/data
+elasticsearch_log_directory: /opt/elasticsearch/logs
+elasticsearch_node_type: hot

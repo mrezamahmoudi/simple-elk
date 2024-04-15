@@ -1,0 +1,36 @@
+- name: Stop elasticsearch service
+  ansible.builtin.systemd:
+    name: elasticsearch.service
+    state: stopped
+  tags: [never, stop_elasticsearch]
+
+# Downliad and  install elasticsearch
+- name: Downloading Elasticsearch {{ elasticsearch_version }} package
+  get_url:
+  # https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.13.1-amd64.deb
+    url: "{{ registry_url }}/downloads/elasticsearch/elasticsearch-{{ elasticsearch_version }}-amd64.deb"
+    dest: "/tmp/elasticsearch-{{ elasticsearch_version }}-amd64.deb"
+  register: download_elasticsearch_deb_package
+  until: download_elasticsearch_deb_package is succeeded
+  retries: 5
+  delay: 2
+  tags: [download_elasticsearch, install_elasticsearch]
+
+- name: Install elasticsearch {{ elasticsearch_version }}
+  apt:
+    deb: "/tmp/elasticsearch-{{ elasticsearch_version }}-amd64.deb"
+  tags: [install_elasticsearch]
+
+# Start the service
+- name: Start elasticsearch service
+  ansible.builtin.systemd:
+    name: elasticsearch.service
+    state: started
+  tags: [never, start_elasticsearch]
+
+# enable the service
+- name: Enable elasticsearch service
+  ansible.builtin.systemd:
+    name: elasticsearch.service
+    state: enabled
+  tags: [never, enable_elasticsearch]

@@ -1,0 +1,10 @@
+- name: Install and configure service
+  hosts: all
+  gather_facts: yes
+
+  tasks:
+    - name: Import install playbook
+      import_playbook: install.yml
+
+    - name: Import configure playbook
+      import_playbook: config.yml
